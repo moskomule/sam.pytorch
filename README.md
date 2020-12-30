@@ -1,7 +1,8 @@
 # sam.pytorch
 
 A PyTorch implementation of *Sharpness-Aware Minimization for Efficiently Improving Generalization* (
-Foret+2020) [Paper](https://arxiv.org/abs/2010.01412), [Official implementation](https://github.com/google-research/sam).
+Foret+2020) [Paper](https://arxiv.org/abs/2010.01412), [Official implementation](https://github.com/google-research/sam)
+.
 
 ## Requirements
 
@@ -16,17 +17,19 @@ To run the example, you further need
 ## Example
 
 ```commandline
-python cifar10.py [--optim.name {sam,sgd}] [--model {renst20,...}] [--optim.rho 0.05]
+python cifar10.py [--optim.name {sam,sgd}] [--model {renst20, wrn28_2}] [--optim.rho 0.05]
 ```
 
-### Results: Test Accuracy (ResNet-20 on CIFAR-10)
+### Results: Test Accuracy (CIFAR-10)
 
-| SAM | SGD |
-| --- | --- |
-| --- | --- |
+Model       | SAM | SGD |
+---         | --- | --- |
+ResNet-20   | 93.5| 93.2|
+WRN28-2     | 95.8| 95.4|
 
-SAM needs double forward passes per each update, thus training with SAM is slower than training with SGD (80 mins vs 50
-mins on my environment).
+SAM needs double forward passes per each update, thus training with SAM is slower than training with SGD. In case of
+ResNet-20 training, 80 mins vs 50 mins on my environment. Additional options `--use_amp --jit_model` may slightly
+accelerates the training.
 
 ## Usage
 

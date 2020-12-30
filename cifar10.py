@@ -21,7 +21,7 @@ class Optim:
     epochs: int = 200
     name: str = chika.choices("sam", "sgd")
     lr: float = 0.1
-    weight_decay: float = 1e-4
+    weight_decay: float = 5e-4
     rho: float = 5e-2
 
 

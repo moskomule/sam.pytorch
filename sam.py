@@ -32,7 +32,7 @@ class SAMSGD(SGD):
         if rho <= 0:
             raise ValueError(f"Invalid neighborhood size: {rho}")
         super().__init__(params, lr, momentum, dampening, weight_decay, nesterov)
-        # to be generalized
+        # todo: generalize this
         if len(self.param_groups) > 1:
             raise ValueError("Not supported")
         self.param_groups[0]["rho"] = rho
@@ -61,7 +61,8 @@ class SAMSGD(SGD):
 
             for p in group['params']:
                 if p.grad is not None:
-                    grads.append(p.grad)
+                    # without clone().detach(), p.grad will be zeroed by closure()
+                    grads.append(p.grad.clone().detach())
                     params_with_grads.append(p)
             device = grads[0].device
 

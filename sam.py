@@ -1,4 +1,3 @@
-import warnings
 from typing import Iterable
 
 import torch
@@ -7,7 +6,7 @@ from torch.optim._multi_tensor import SGD
 __all__ = ["SAMSGD"]
 
 
-class SAMSGD(torch.optim.Optimizer):
+class SAMSGD(SGD):
     """ SGD wrapped with Sharp-Aware Minimization
 
     Args:
@@ -32,14 +31,11 @@ class SAMSGD(torch.optim.Optimizer):
                  ):
         if rho <= 0:
             raise ValueError(f"Invalid neighborhood size: {rho}")
-        defaults = dict(rho=rho, lr=lr)
-        params = list(params)
-        self._internal_optim = SGD(params, lr=lr, momentum=momentum, dampening=dampening,
-                                   weight_decay=weight_decay, nesterov=nesterov)
-        super().__init__(params, defaults)
+        super().__init__(params, lr, momentum, dampening, weight_decay, nesterov)
+        # to be generalized
         if len(self.param_groups) > 1:
-            warnings.warn("The computation cost of this implementation depends on the number of param_groups. "
-                          "Also, gradient_norm is computed group-wise, which may incur unexpected behavior.")
+            raise ValueError("Not supported")
+        self.param_groups[0]["rho"] = rho
 
     @torch.no_grad()
     def step(self,
@@ -56,13 +52,12 @@ class SAMSGD(torch.optim.Optimizer):
         closure = torch.enable_grad()(closure)
         loss = closure().detach()
 
-        for group, in_group in zip(self.param_groups, self._internal_optim.param_groups):
+        for group in self.param_groups:
             grads = []
             params_with_grads = []
 
             rho = group['rho']
             # update internal_optim's learning rate
-            in_group['lr'] = group['lr']
 
             for p in group['params']:
                 if p.grad is not None:
@@ -82,15 +77,5 @@ class SAMSGD(torch.optim.Optimizer):
             # virtual step back to the original point
             torch._foreach_sub_(params_with_grads, epsilon)
 
-        self._internal_optim.step()
+        super().step()
         return loss
-
-    def state_dict(self) -> dict:
-        state_dict = super().state_dict()
-        state_dict["internal"] = self._internal_optim.state_dict()
-        return state_dict
-
-    def load_state_dict(self, state_dict: dict) -> None:
-        _internal = state_dict.pop("internal")
-        self._internal_optim.load_state_dict(_internal)
-        super().load_state_dict(state_dict)

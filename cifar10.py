@@ -31,6 +31,9 @@ class Config:
     model: str = chika.choices("resnet20", "resnet56", "se_resnet56", "wrn28_2", "rexnext29_32x4d")
     batch_size: int = 128
     use_amp: bool = False
+    jit_model: bool = False
+    seed: int = 1
+    gpu: int = chika.bounded(0, 0, torch.cuda.device_count())
 
 
 class Trainer(trainers.SupervisedTrainer):
@@ -53,9 +56,10 @@ class Trainer(trainers.SupervisedTrainer):
         self.reporter.add("loss", loss)
 
 
-@chika.main(cfg_cls=Config, strict=True)
-def main(cfg):
+def _main(cfg):
     model = MODEL_REGISTRY(cfg.model)(num_classes=10)
+    if cfg.jit_model:
+        model = torch.jit.script(model)
     train_loader, test_loader = DATASET_REGISTRY("cifar10")(cfg.batch_size, num_workers=4)
     optimizer = (SAM(lr=cfg.optim.lr, momentum=0.9, weight_decay=cfg.optim.weight_decay, rho=cfg.optim.rho)
                  if cfg.optim.name == "sam" else
@@ -75,6 +79,13 @@ def main(cfg):
             trainer.scheduler.step()
 
         print(f"Max Test Accuracy={max(trainer.reporter.history('accuracy/test')):.3f}")
+
+
+@chika.main(cfg_cls=Config, strict=True)
+def main(cfg: Config):
+    torch.cuda.set_device(cfg.gpu)
+    with homura.set_seed(cfg.seed):
+        _main(cfg)
 
 
 if __name__ == '__main__':

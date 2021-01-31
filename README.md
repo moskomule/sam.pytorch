@@ -26,6 +26,7 @@ Model       | SAM | SGD |
 ---         | --- | --- |
 ResNet-20   | 93.5| 93.2|
 WRN28-2     | 95.8| 95.4|
+ResNeXT29   | 96.4| 95.8|
 
 SAM needs double forward passes per each update, thus training with SAM is slower than training with SGD. In case of
 ResNet-20 training, 80 mins vs 50 mins on my environment. Additional options `--use_amp --jit_model` may slightly

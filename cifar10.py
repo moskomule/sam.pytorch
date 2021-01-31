@@ -28,7 +28,7 @@ class Optim:
 @chika.config
 class Config:
     optim: Optim
-    model: str = chika.choices("resnet20", "resnet56", "se_resnet56", "wrn28_2", "rexnext29_32x4d")
+    model: str = chika.choices("resnet20", "resnet56", "se_resnet56", "wrn28_2", "resnext29_32x4d")
     batch_size: int = 128
     use_amp: bool = False
     jit_model: bool = False

@@ -34,8 +34,8 @@ accelerates the training.
 
 ## Usage
 
-`SAMSGD` can be used as a drop-in replacement of PyTorch optimizers with closures. Also, it is compatible
-with `lr_scheduler` and has `state_dict` and `load_state_dict`.
+`SAMSGD` can be used as a drop-in replacement of PyTorch optimizers by using a closure as follows. Also, it is compatible
+with `lr_scheduler` and has `state_dict` and `load_state_dict`. Currently, this implementation does not support multiple parameter groups.
 
 ```python
 from sam import SAMSGD
